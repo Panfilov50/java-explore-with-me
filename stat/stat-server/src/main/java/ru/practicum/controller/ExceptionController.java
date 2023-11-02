@@ -17,9 +17,7 @@ public class ExceptionController {
     public Error handleException(Exception exception) {
         log.error("Error", exception);
         StringWriter out = new StringWriter();
-        exception.printStackTrace(new PrintWriter(out));
-        String stackTrace = out.toString();
-        return new Error(exception.getMessage(), stackTrace);
+        return new Error(exception.getMessage(), out.toString());
     }
 
     @AllArgsConstructor
