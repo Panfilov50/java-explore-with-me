@@ -1,9 +1,8 @@
 package ru.practicum.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "endpoint_hits")
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
