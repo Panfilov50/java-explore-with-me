@@ -2,6 +2,7 @@ package ru.practicum.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 
 import javax.persistence.Column;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "endpoint_hits")
 @Getter
+@RequiredArgsConstructor
 public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
