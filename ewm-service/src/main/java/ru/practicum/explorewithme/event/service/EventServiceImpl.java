@@ -10,12 +10,25 @@ import ru.practicum.explorewithme.category.exception.CategoryNotFoundException;
 import ru.practicum.explorewithme.category.model.Category;
 import ru.practicum.explorewithme.category.repository.CategoryRepository;
 import ru.practicum.explorewithme.client.StatsClient;
-import ru.practicum.explorewithme.event.dto.*;
+
+import ru.practicum.explorewithme.event.dto.EventFullDto;
+import ru.practicum.explorewithme.event.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.explorewithme.event.dto.EventRequestStatusUpdateResult;
+import ru.practicum.explorewithme.event.dto.EventShortDto;
+import ru.practicum.explorewithme.event.dto.NewEventDto;
+import ru.practicum.explorewithme.event.dto.UpdateEvent;
+import ru.practicum.explorewithme.event.dto.UpdateEventAdminRequest;
+import ru.practicum.explorewithme.event.dto.UpdateEventUserRequest;
 import ru.practicum.explorewithme.event.exception.EventBadStateException;
 import ru.practicum.explorewithme.event.exception.EventBadTimeException;
 import ru.practicum.explorewithme.event.exception.EventNotFoundException;
 import ru.practicum.explorewithme.event.exception.NotInitiatorException;
-import ru.practicum.explorewithme.event.model.*;
+
+import ru.practicum.explorewithme.event.model.AdminSearchParameters;
+import ru.practicum.explorewithme.event.model.Event;
+import ru.practicum.explorewithme.event.model.PublicSearchParameters;
+import ru.practicum.explorewithme.event.model.StateAction;
+import ru.practicum.explorewithme.event.model.Status;
 import ru.practicum.explorewithme.event.repository.EventRepository;
 import ru.practicum.explorewithme.location.model.Location;
 import ru.practicum.explorewithme.location.repository.LocationRepository;
@@ -34,7 +47,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.explorewithme.event.dto.EventMapper.*;
+import static ru.practicum.explorewithme.event.dto.EventMapper.toEvent;
+import static ru.practicum.explorewithme.event.dto.EventMapper.toFullDto;
+import static ru.practicum.explorewithme.event.dto.EventMapper.toShortDto;
 import static ru.practicum.explorewithme.request.dto.RequestMapper.toDto;
 
 @Slf4j
@@ -91,50 +106,120 @@ public class EventServiceImpl implements EventService {
         List<Event> foundEvents;
         client.addHit(APP, request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now().format(FORMATTER));
 
-        if (parameters.getText() != null && parameters.getPaid() != null && categories != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getText(), parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
-        } else if (parameters.getText() != null && parameters.getPaid() != null && categories != null) {
-            foundEvents = repository.findAll(parameters.getText(), parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
-        } else if (parameters.getText() != null && parameters.getPaid() != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getText(), parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
-        } else if (parameters.getText() != null && categories != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getText(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
-        } else if (parameters.getPaid() != null && categories != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
-        } else if (parameters.getText() != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getText(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
-        } else if (parameters.getPaid() != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
-        } else if (categories != null && parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getRangeStart(), parameters.getRangeEnd(),
+        if (parameters.getText() != null &&
+                parameters.getPaid() != null &&
+                categories != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getText(),
+                    parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
+
+        } else if (parameters.getText() != null &&
+                parameters.getPaid() != null &&
+                categories != null) {
+            foundEvents = repository.findAll(parameters.getText(),
+                    parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
+        } else if (parameters.getText() != null &&
+                parameters.getPaid() != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getText(),
+                    parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
+        } else if (parameters.getText() != null &&
+                categories != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getText(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
                     categories, parameters.getPageRequest());
-        } else if (parameters.getText() != null && parameters.getPaid() != null) {
-            foundEvents = repository.findAll(parameters.getText(), parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
-        } else if (parameters.getText() != null && categories != null) {
-            foundEvents = repository.findAll(parameters.getText(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
-        } else if (parameters.getPaid() != null && categories != null) {
-            foundEvents = repository.findAll(parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), categories, parameters.getPageRequest());
+
+        } else if (parameters.getPaid() != null &&
+                categories != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
+        } else if (parameters.getText() != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getText(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
+        } else if (parameters.getPaid() != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
+        } else if (categories != null &&
+                parameters.getOnlyAvailable()) {
+            foundEvents = repository.findAllOnlyAvailable(parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
+        } else if (parameters.getText() != null &&
+                parameters.getPaid() != null) {
+            foundEvents = repository.findAll(parameters.getText(),
+                    parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
+        } else if (parameters.getText() != null &&
+                categories != null) {
+            foundEvents = repository.findAll(parameters.getText(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
+        } else if (parameters.getPaid() != null &&
+                categories != null) {
+            foundEvents = repository.findAll(parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
         } else if (parameters.getText() != null) {
-            foundEvents = repository.findAll(parameters.getText(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
+            foundEvents = repository.findAll(parameters.getText(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (parameters.getPaid() != null) {
-            foundEvents = repository.findAll(parameters.getPaid(), parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
+            foundEvents = repository.findAll(parameters.getPaid(),
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (categories != null) {
-            foundEvents = repository.findAll(parameters.getRangeStart(), parameters.getRangeEnd(),
-                    categories, parameters.getPageRequest());
+            foundEvents = repository.findAll(parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    categories,
+                    parameters.getPageRequest());
+
         } else if (parameters.getOnlyAvailable()) {
-            foundEvents = repository.findAllOnlyAvailable(parameters.getRangeStart(), parameters.getRangeEnd(),
+            foundEvents = repository.findAllOnlyAvailable(parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
                     parameters.getPageRequest());
         } else {
             foundEvents = repository.findAll(parameters.getRangeStart(), parameters.getRangeEnd(),
@@ -153,30 +238,60 @@ public class EventServiceImpl implements EventService {
         List<User> users = findUsers(parameters.getUsers());
         List<Status> statuses = findStates(parameters.getStates());
 
-        if (users != null && statuses != null && categories != null) {
+        if (users != null &&
+                statuses != null &&
+                categories != null) {
             foundEvents = repository.findAllByInitiatorInAndStateInAndCategoryInAndEventDateIsAfterAndEventDateIsBefore(users,
-                    statuses, categories, parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
-        } else if (users != null && statuses != null) {
+                    statuses,
+                    categories,
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
+        } else if (users != null &&
+                statuses != null) {
             foundEvents = repository.findAllByInitiatorInAndStateInAndEventDateIsAfterAndEventDateIsBefore(users,
-                    statuses, parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    statuses,
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (users != null && categories != null) {
             foundEvents = repository.findAllByInitiatorInAndCategoryInAndEventDateIsAfterAndEventDateIsBefore(users,
-                    categories, parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    categories,
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (statuses != null && categories != null) {
             foundEvents = repository.findAllByStateInAndCategoryInAndEventDateIsAfterAndEventDateIsBefore(statuses,
-                    categories, parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    categories,
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (users != null) {
             foundEvents = repository.findAllByInitiatorInAndEventDateIsAfterAndEventDateIsBefore(users,
-                    parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (statuses != null) {
             foundEvents = repository.findAllByStateInAndEventDateIsAfterAndEventDateIsBefore(statuses,
-                    parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else if (categories != null) {
             foundEvents = repository.findAllByCategoryInAndEventDateIsAfterAndEventDateIsBefore(categories,
-                    parameters.getRangeStart(), parameters.getRangeEnd(), parameters.getPageRequest());
+                    parameters.getRangeStart(),
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
+
         } else {
             foundEvents = repository.findAllByEventDateIsAfterAndEventDateIsBefore(parameters.getRangeStart(),
-                    parameters.getRangeEnd(), parameters.getPageRequest());
+                    parameters.getRangeEnd(),
+                    parameters.getPageRequest());
         }
 
         log.info("Found events: " + foundEvents);
