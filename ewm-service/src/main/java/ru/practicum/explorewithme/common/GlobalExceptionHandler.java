@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now().format(FORMATTER));
     }
 
-    @ExceptionHandler({EventBadStateException.class, FieldIsNotValidException.class})
+    @ExceptionHandler({FieldIsNotValidException.class, EventBadTimeException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleRuntimeException(Exception e) {
         StackTraceElement[] stackTrace = e.getStackTrace();
