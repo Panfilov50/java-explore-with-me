@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,32 +28,67 @@ public class GlobalExceptionHandler {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @ExceptionHandler({RuntimeException.class,
-            EventBadTimeException.class,
-            FieldIsNotValidException.class,
-            EventBadStateException.class,
-            EventNotFoundException.class,
-            UserNotFoundException.class,
-            CompilationNotFoundException.class,
-            CategoryNotFoundException.class,
-            ParticipantLimitException.class,
-            DuplicateRequestException.class,
-            RequestOwnerException.class,
-            EventIsNotPublishedException.class,
-            DataIntegrityViolationException.class
-
-    })
-    @ResponseStatus()
+    @ExceptionHandler({RuntimeException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(Exception e) {
         StackTraceElement[] stackTrace = e.getStackTrace();
         List<String> errors = new ArrayList<>();
         for (StackTraceElement stackTraceElement : stackTrace) {
             errors.add(stackTraceElement + "\n");
         }
-
         log.info(errors + "MESSAGE: " + e.getMessage());
 
-        return new ApiError(errors, e.getMessage(), e.getLocalizedMessage(), LocalDateTime.now().format(FORMATTER));
+        return new ApiError(errors, e.getMessage(), e.getLocalizedMessage(),HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+                LocalDateTime.now().format(FORMATTER));
     }
 
+    @ExceptionHandler({EventBadStateException.class, FieldIsNotValidException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleRuntimeException(Exception e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        List<String> errors = new ArrayList<>();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            errors.add(stackTraceElement + "\n");
+        }
+        log.info(errors + "MESSAGE: " + e.getMessage());
+
+        return new ApiError(errors, e.getMessage(), e.getLocalizedMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.toString(), LocalDateTime.now().format(FORMATTER));
+    }
+
+    @ExceptionHandler({EventBadStateException.class,
+            ParticipantLimitException.class,
+            DuplicateRequestException.class,
+            RequestOwnerException.class,
+            EventIsNotPublishedException.class,
+            DataIntegrityViolationException.class
+    })
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleEventBadStateException(Exception e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        List<String> errors = new ArrayList<>();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            errors.add(stackTraceElement + "\n");
+        }
+
+        return new ApiError(errors, e.getMessage(), e.getLocalizedMessage(),
+                HttpStatus.CONFLICT.toString(), LocalDateTime.now().format(FORMATTER));
+    }
+
+    @ExceptionHandler({CategoryNotFoundException.class,
+            CompilationNotFoundException.class,
+            UserNotFoundException.class,
+            EventNotFoundException.class
+    })
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleEventNotFoundException(Exception e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        List<String> errors = new ArrayList<>();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            errors.add(stackTraceElement + "\n");
+        }
+
+        return new ApiError(errors, e.getMessage(), e.getLocalizedMessage(),
+                HttpStatus.NOT_FOUND.toString(), LocalDateTime.now().format(FORMATTER));
+    }
 }
