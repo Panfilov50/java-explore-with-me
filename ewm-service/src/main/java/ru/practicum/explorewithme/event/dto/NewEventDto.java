@@ -1,6 +1,9 @@
 package ru.practicum.explorewithme.event.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import ru.practicum.explorewithme.location.model.Location;
 
