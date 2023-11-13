@@ -18,6 +18,7 @@ import javax.persistence.Id;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class Location {
 
     @Id
