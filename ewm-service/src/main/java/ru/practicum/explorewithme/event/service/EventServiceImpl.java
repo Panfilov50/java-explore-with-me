@@ -30,6 +30,8 @@ import ru.practicum.explorewithme.event.model.PublicSearchParameters;
 import ru.practicum.explorewithme.event.model.StateAction;
 import ru.practicum.explorewithme.event.model.Status;
 import ru.practicum.explorewithme.event.repository.EventRepository;
+import ru.practicum.explorewithme.location.dto.LocationDto;
+import ru.practicum.explorewithme.location.exception.LocationsFieldsIsEmptyException;
 import ru.practicum.explorewithme.location.model.Location;
 import ru.practicum.explorewithme.location.repository.LocationRepository;
 import ru.practicum.explorewithme.request.dto.ParticipationRequestDto;
@@ -47,9 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.explorewithme.event.dto.EventMapper.toEvent;
-import static ru.practicum.explorewithme.event.dto.EventMapper.toFullDto;
-import static ru.practicum.explorewithme.event.dto.EventMapper.toShortDto;
+import static ru.practicum.explorewithme.event.dto.EventMapper.*;
 import static ru.practicum.explorewithme.request.dto.RequestMapper.toDto;
 
 @Slf4j
@@ -299,6 +299,31 @@ public class EventServiceImpl implements EventService {
         return toFullDto(foundEvents);
     }
 
+
+    @Override
+    public List<EventShortDto> findEventsByLocation(LocationDto location) {
+        List<Event> events;
+
+        if (location.getAddress() != null && location.getName() != null && location.getLat() != null && location.getLon() != null) {
+            events = repository.findAllByLocationNameIgnoreCaseAndLocationAddressIgnoreCaseAndLocationLatAndLocationLon(location.getName(),
+                    location.getAddress(), location.getLat(), location.getLon());
+        } else if (location.getAddress() != null && location.getName() != null) {
+            events = repository.findAllByLocationAddressAndLocationName(location.getName(), location.getAddress());
+        } else if (location.getLat() != null && location.getLon() != null) {
+            events = repository.findAllByLocationLatAndLocationLon(location.getLat(), location.getLon());
+        } else if (location.getAddress() != null) {
+            events = repository.findAllByLocationAddressIgnoreCase(location.getAddress());
+        } else if (location.getName() != null) {
+            events = repository.findAllByLocationNameIgnoreCase(location.getName());
+        } else {
+            throw new LocationsFieldsIsEmptyException();
+        }
+
+        log.info("Found events: " + events);
+
+        return toShortDto(events);
+    }
+
     @Override
     public EventFullDto getEvent(long userId, long eventId) {
         findUser(userId);
@@ -314,8 +339,8 @@ public class EventServiceImpl implements EventService {
     public EventFullDto createEvent(long userId, NewEventDto newEvent) {
         User user = findUser(userId);
         Category category = findCategory(newEvent.getCategory());
+        Location location = findOrCreateLocation(newEvent.getLocation());
         checkValidEventDate(newEvent.getEventDate());
-        Location location = (findOrCreateLocation(newEvent.getLocation()));
         Event savedEvent = repository.save(toEvent(newEvent, user, category, location));
 
         log.info("Event: " + savedEvent + " saved");
@@ -502,7 +527,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Location findOrCreateLocation(Location location) {
-        Location foundLocation = locationRepository.findByLatAndLon(location.getLat(), location.getLon());
+        Location foundLocation = locationRepository.checkLocation(location.getLat(), location.getLon());
 
         if (foundLocation == null) {
             foundLocation = locationRepository.save(location);
