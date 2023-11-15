@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.event.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.request.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

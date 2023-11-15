@@ -84,23 +84,25 @@ public class EventMapper {
         } else {
             paid = event.getPaid();
         }
+
         if (event.getParticipantLimit() == null) {
             limit = 0;
         } else {
             limit = event.getParticipantLimit();
         }
+
         if (event.getRequestModeration() == null) {
             requestModeration = true;
         } else  {
             requestModeration = event.getRequestModeration();
         }
+
         return Event.builder()
                 .location(location)
                 .annotation(event.getAnnotation())
                 .category(category)
                 .description(event.getDescription())
                 .eventDate(LocalDateTime.parse(event.getEventDate(), FORMATTER))
-                .location(event.getLocation())
                 .paid(paid)
                 .participantLimit(limit)
                 .requestModeration(requestModeration)

@@ -1,7 +1,6 @@
 package ru.practicum.explorewithme.user.model;
 
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -15,12 +14,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-
 @Getter
 @Setter
 @Entity(name = "users")
 @Builder
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

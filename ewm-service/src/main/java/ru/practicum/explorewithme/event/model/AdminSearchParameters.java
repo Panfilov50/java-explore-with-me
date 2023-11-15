@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.event.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
