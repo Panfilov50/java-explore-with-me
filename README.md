@@ -90,5 +90,3 @@ API основного сервиса разделено на три части:
 - Lombok
 - Postman
 - Docker
-
-https://github.com/Panfilov50/java-explore-with-me/pull/4
